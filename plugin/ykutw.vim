@@ -24,34 +24,36 @@
 if exists('g:loaded_ykutw') | finish | endif
 let g:loaded_ykutw = 1
 
-function s:DoWordMotion()
-	let before = line('.')
-	execute 'normal! v'.v:count1.'w'
+function s:DoWordMotion(a:move)
+    let before = line('.')
+    execute 'normal! v'.v:count1 . a:move
 
-	" when the cursor wraps, we must check whether it went too far
-	if line('.') != before
-		" try backing up to the end of the previous word
-		" and then see if we stay on the same line
-		let target = winsaveview()
-		let before = line('.')
-		exe 'normal! ge'
-		if line('.') != before
-			" we are now at the end of the word at the end of previous line,
-			" which is exactly where we want to be
-			return
-		else
-			" we were (almost) in the right place, so go back there
-			call winrestview(target)
-		endif
-	endif
+    " when the cursor wraps, we must check whether it went too far
+    if line('.') != before
+        " try backing up to the end of the previous word
+        " and then see if we stay on the same line
+        let target = winsaveview()
+        let before = line('.')
+        exe 'normal! g'.(a:move == 'w' ? 'e' : 'E')
+        if line('.') != before
+            " we are now at the end of the word at the end of previous line,
+            " which is exactly where we want to be
+            return
+        else
+            " we were (almost) in the right place, so go back there
+            call winrestview(target)
+        endif
+    endif
 
-	" visual selections are inclusive; to avoid erasing the first char
-	" of the following word, we must back off one column
-	execute 'normal! h'
+    " visual selections are inclusive; to avoid erasing the first char
+    " of the following word, we must back off one column
+    execute 'normal! h'
 endfunction
 
-onoremap = :<C-U>call <SID>DoWordMotion()<CR>
+onoremap <script> <SID>DoWordMotion :<C-U>call <SID>DoWordMotion('w')<CR>
+onoremap <script> <SID>DoWORDMotion :<C-U>call <SID>DoWordMotion('W')<CR>
 
-omap <expr> w v:operator == 'c' ? '=' : 'w'
+onoremap <script> <expr> w v:operator == 'c' ? "\<SID>DoWordMotion" : 'w'
+onoremap <script> <expr> W v:operator == 'c' ? "\<SID>DoWORDMotion" : 'W'
 
 " vim: fdm=marker fmr={{{,}}}
