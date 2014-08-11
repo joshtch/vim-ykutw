@@ -26,7 +26,10 @@ let g:loaded_ykutw = 1
 
 function s:DoWordMotion(motion, backmotion)
 	let before = line('.')
-	execute 'normal! v'.v:count1.a:motion
+
+        " select region; since visual selections are inclusive, we must back off
+        " one column to avoid erasing the first char of the following word
+	execute 'normal! v'.v:count1.a:motion.'h'
 
 	" when the cursor wraps, we must check whether it went too far
 	if line('.') != before
@@ -35,19 +38,11 @@ function s:DoWordMotion(motion, backmotion)
 		let target = winsaveview()
 		let before = line('.')
 		exe 'normal! g'.a:backmotion
-		if line('.') != before
-			" we are now at the end of the word at the end of previous line,
-			" which is exactly where we want to be
-			return
-		else
-			" we were (almost) in the right place, so go back there
+		if line('.') == before
+			" we were in the right place, so go back there
 			call winrestview(target)
 		endif
 	endif
-
-	" visual selections are inclusive; to avoid erasing the first char
-	" of the following word, we must back off one column
-	execute 'normal! h'
 endfunction
 
 onoremap w :<C-U>call <SID>DoWordMotion('w','e')<CR>
