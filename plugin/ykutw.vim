@@ -37,7 +37,7 @@ function s:DoWordMotion(motion, backmotion)
 		" and then see if we stay on the same line
 		let target = winsaveview()
 		let before = line('.')
-		exe 'normal! g'.a:backmotion
+		exe 'normal!' a:backmotion
 		if line('.') == before
 			" we were in the right place, so go back there
 			call winrestview(target)
@@ -45,7 +45,7 @@ function s:DoWordMotion(motion, backmotion)
 	endif
 endfunction
 
-onoremap w :<C-U>call <SID>DoWordMotion('w','e')<CR>
-onoremap W :<C-U>call <SID>DoWordMotion('W','E')<CR>
+onoremap w :<C-U>call <SID>DoWordMotion('w','ge')<CR>
+onoremap W :<C-U>call <SID>DoWordMotion('W','gE')<CR>
 
 " vim: fdm=marker fmr={{{,}}}
